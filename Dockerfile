@@ -8,6 +8,7 @@ RUN apk update \
     && pip install --upgrade pip==18.0 \
     && pip install pipenv==2018.7.1
 
+
 COPY Pipfile /app/Pipfile
 COPY Pipfile.lock /app/Pipfile.lock
 
