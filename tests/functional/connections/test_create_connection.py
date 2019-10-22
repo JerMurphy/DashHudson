@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from tests.factories import PersonFactory
 
-from connections.models.connection import Connection
+from connections.models.connection import Connection, ConnectionType
 
 
 def test_can_create_connection(db, testapp):
@@ -23,6 +23,7 @@ def test_can_create_connection(db, testapp):
     connection = Connection.query.get(res.json['id'])
 
     assert connection is not None
-    assert connection.from_person_id == person_from.id
-    assert connection.to_person_id == person_to.id
-    assert connection.connection_type.value == 'mother'
+    assert connection.from_person_id == person_from.id #assert that the from_id is valid from response
+    assert connection.to_person_id == person_to.id #assert that the to_id is valid from response
+    assert connection.connection_type.value == 'mother' #assert that the value is the one you entered above
+    assert hasattr(ConnectionType, connection.connection_type.value) #assert that the value inserted is in the list of types 
