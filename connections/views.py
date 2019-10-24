@@ -39,18 +39,22 @@ def get_connections():
     connection_schema = ConnectionSchema(many=True)
     people_schema = PersonSchema(many=True)
     people_list = []
-    connections = Connection.query.filter(Connection.from_person_id == from_id).all()
+    connections = Connection.query.all()
     for x in connections:
-        person = Person.query.get(x.to_person_id)
-        new_obj = {
-            "first_name" : person.first_name,
-            "last_name" : person.last_name,
-            "id": person.id,
-            "email": person.email,
-            "connection_type": x.connection_type.value,
-            "connection_id": x.id
-        }
-        people_list.append(new_obj)
+        if(x.to_person_id):
+            person = Person.query.get(x.to_person_id)
+            new_obj = {
+                "first_name" : person.first_name,
+                "last_name" : person.last_name,
+                "id": person.id,
+                "email": person.email,
+                "connection_type": x.connection_type.value,
+                "connection_id": x.id,
+                "from_person_id": x.from_person_id
+            }
+            people_list.append(new_obj)
+        else:
+            print(x.id)
     return jsonify(people_list), HTTPStatus.OK
 
 @blueprint.route('/connections/<connection_id>', methods=['PATCH'])
