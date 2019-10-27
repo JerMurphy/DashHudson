@@ -20,7 +20,7 @@ def test_can_create_connection(db, testapp):
 
     assert 'id' in res.json
 
-    connection = Connection.query.get(res.json['id'])
+    connection = Connection.query.get(res.json['connection_id'])
 
     assert connection is not None
     assert connection.from_person_id == person_from.id #assert that the from_id is valid from response

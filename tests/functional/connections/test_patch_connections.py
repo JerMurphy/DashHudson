@@ -16,7 +16,7 @@ def test_can_create_connection(db, testapp):
     }
     res = testapp.post('/connections', json=payload)
 
-    url = "/connections/{}".format(res.json['id'])
+    url = "/connections/{}".format(res.json['connection_id'])
     body = {
         "type":'father'
     }

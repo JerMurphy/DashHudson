@@ -8,8 +8,7 @@ from connections.models.person import Person
 from connections.models.connection import Connection, ConnectionType
 from connections.schemas import ConnectionSchema, PersonSchema
 
-blueprint = Blueprint('connections', __name__)
-
+blueprint = Blueprint('connections', __name__,)
 
 @blueprint.route('/people', methods=['GET'])
 def get_people():
@@ -29,15 +28,29 @@ def get_people():
 @blueprint.route('/people', methods=['POST'])
 @use_args(PersonSchema(), locations=('json',))
 def create_person(person):
-    person.save()
-    return PersonSchema().jsonify(person), HTTPStatus.CREATED
+    isValid = checkValidity(person)
+    if(isValid['passed']):
+        person.save()
+        return PersonSchema().jsonify(person), HTTPStatus.CREATED
+    else:
+        return jsonify({"errors": isValid['errors'],'description': "Input failed validation."}), HTTPStatus.BAD_REQUEST
+
+def checkValidity(person):
+    regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+    if(person.first_name is not None and person.last_name is not None and person.email is not None):
+        if(re.search(regex,person.email)):  
+            return {'passed':True} #has all fields and email is correct
+        else:  
+            return {'passed':False, 'errors': {'email': "Not a valid email address."}} # email is not right
+    else:
+        return {'passed':False, 'errors': {'error': "Missing Inputs"}} # missing params
+
+
 
 # /connections takes in a from_id and returns all people that id is connected to with their info
 @blueprint.route('/connections', methods=['GET'])
 def get_connections():
-    from_id = request.args.get('from_id', None)
     connection_schema = ConnectionSchema(many=True)
-    people_schema = PersonSchema(many=True)
     people_list = []
     connections = Connection.query.all()
     for x in connections:
@@ -59,11 +72,11 @@ def get_connections():
 
 @blueprint.route('/connections/<connection_id>', methods=['PATCH'])
 def patch_connections(connection_id):
-    type = request.json['type'] # get new connection type
-    if hasattr(ConnectionType, type): # verify that the Connection Type has the attribute you're trying to change to
+    newtype = request.json['type'] # get new connection type
+    if hasattr(ConnectionType, newtype): # verify that the Connection Type has the attribute you're trying to change to
         connection_schema = ConnectionSchema() 
         connection = Connection.query.get(connection_id) # find existing connection
-        connection.connection_type = type # update the local version of the connection
+        connection.connection_type = newtype # update the local version of the connection
         connection.update() # use pre build CRUD update to update live record in DB
         return connection_schema.jsonify(connection), HTTPStatus.OK # return updated value
     else:
@@ -75,4 +88,14 @@ def patch_connections(connection_id):
 @use_args(ConnectionSchema(), locations=('json',))
 def create_connection(connection):
     connection.save()
-    return ConnectionSchema().jsonify(connection), HTTPStatus.CREATED
+    person = Person.query.get(connection.to_person_id)
+    new_obj = {
+        "first_name" : person.first_name,
+        "last_name" : person.last_name,
+        "id": person.id,
+        "email": person.email,
+        "connection_type": connection.connection_type.value,
+        "connection_id": connection.id,
+        "from_person_id": connection.from_person_id
+    }
+    return jsonify(new_obj), HTTPStatus.CREATED

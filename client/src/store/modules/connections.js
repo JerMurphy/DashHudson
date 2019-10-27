@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const state = {
-    connections: []
+    connections: {}
 };
 
 const getters = {
@@ -11,7 +11,18 @@ const getters = {
 const actions = {
     async getConnections({ commit }){
         const response = await axios.get('http://localhost:5000/connections');
-        commit('setConnections', response.data);
+        const obj = {};
+
+        //puts them into a object sorted by personID to easily display in front end
+        response.data.forEach(element => {
+            if(obj[element.from_person_id]){
+                obj[element.from_person_id].push(element)
+            }else{
+                obj[element.from_person_id] = []
+                obj[element.from_person_id].push(element)
+            }
+        });
+        commit('setConnections', obj);
     },
     async addConnection({ commit }, obj){
         const response = await axios.post('http://localhost:5000/connections', obj);
@@ -21,7 +32,14 @@ const actions = {
 
 const mutations = {
     setConnections: (state,connections) => (state.connections = connections),
-    newConnection: (state,connection) => (state.connections.push(connection))
+    newConnection(state,connection){
+        if(state.connections[connection.from_person_id]){
+            state.connections[connection.from_person_id].push(connection)
+        }else{
+            state.connections[connection.from_person_id] = []
+            state.connections[connection.from_person_id].push(connection)
+        }
+    } 
 };
 
 export default {

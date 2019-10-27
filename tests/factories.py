@@ -29,11 +29,13 @@ class PersonFactory(BaseFactory):
 
 class ConnectionFactory(BaseFactory):
     """Connection factory."""
-
-    connection_type = 'friend'
-
     from_person = SubFactory(PersonFactory)
     to_person = SubFactory(PersonFactory)
+    BaseFactory.Meta.sqlalchemy_session.commit()
+
+    connection_type = 'friend'   
+    from_person_id = from_person.id
+    to_person_id = to_person.id
 
     class Meta:
 

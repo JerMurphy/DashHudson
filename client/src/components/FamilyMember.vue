@@ -5,7 +5,7 @@
     <v-container class="grey lighten-5">
         <p class="headline"> Connections </p>
         <v-row no-gutters>
-            <v-col v-for="connection in allConnections" :key="connection.id"  cols="12" sm="4">
+            <v-col v-for="connection in allConnections[person.id]" :key="connection.id"  cols="12" sm="4">
                 <v-list-item two-line class="spacing">
                 <v-list-item-content>
                     <v-list-item-title>{{connection.first_name}} {{connection.last_name}} </v-list-item-title>
@@ -19,7 +19,7 @@
         <p class="subtitle-1"> Add a connection </p>
         <v-row no-gutters>
             <v-col cols="12" sm="4" class="select">
-                <v-select :items="allMembers" item-text="first_name" v-model="connect_to" label="To"></v-select>
+                <v-select :items="allMembers" item-text="first_name" item-value="id" v-model="connect_to" label="To"></v-select>
             </v-col>
             <v-col cols="12" sm="4">
                 <v-select :items="types" v-model="connect_type" label="Type"></v-select>
@@ -43,14 +43,12 @@ export default {
   methods: {
     ...mapActions(['getConnections', 'getMembers', 'addConnection']),
     connect(){
-        alert(this.connect_to) // this is coming in as the name. we need the id.
-        
-        // var obj = {
-        //     connection_type: this.connect_type,
-        //     from_person_id: this.person.id,
-        //     to_person_id: this.connect_to.id
-        // };
-        //this.addConnection(obj);
+        var obj = {
+            connection_type: this.connect_type,
+            from_person_id: this.person.id,
+            to_person_id: this.connect_to
+        };
+        this.addConnection(obj);
         this.resetFields()
     },
     resetFields(){
@@ -59,6 +57,7 @@ export default {
     }
   },
   created(){
+    //BUG, NOT LOADING NEW CONNECTIONS ON FIRST TIME
     this.getConnections();
   },
   computed: mapGetters(['allConnections', 'allMembers']),

@@ -12,7 +12,7 @@ EXPECTED_FIELDS = [
 
 
 def test_can_get_connection(db, testapp):
-    res = testapp.get('/connections?from_id=1')
+    res = testapp.get('/connections')
 
     assert res.status_code == HTTPStatus.OK #assert it returned an OK
     for connection in res.json:
