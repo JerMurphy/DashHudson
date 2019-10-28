@@ -28,14 +28,14 @@ def get_people():
 @blueprint.route('/people', methods=['POST'])
 @use_args(PersonSchema(), locations=('json',))
 def create_person(person):
-    isValid = checkValidity(person)
+    isValid = checkPeopleValidity(person)
     if(isValid['passed']):
         person.save()
         return PersonSchema().jsonify(person), HTTPStatus.CREATED
     else:
         return jsonify({"errors": isValid['errors'],'description': "Input failed validation."}), HTTPStatus.BAD_REQUEST
 
-def checkValidity(person):
+def checkPeopleValidity(person):
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
     if(person.first_name is not None and person.last_name is not None and person.email is not None):
         if(re.search(regex,person.email)):  
@@ -47,7 +47,7 @@ def checkValidity(person):
 
 
 
-# /connections takes in a from_id and returns all people that id is connected to with their info
+# /connections returns all connections with people's info attached
 @blueprint.route('/connections', methods=['GET'])
 def get_connections():
     connection_schema = ConnectionSchema(many=True)
@@ -87,15 +87,33 @@ def patch_connections(connection_id):
 @blueprint.route('/connections', methods=['POST'])
 @use_args(ConnectionSchema(), locations=('json',))
 def create_connection(connection):
-    connection.save()
-    person = Person.query.get(connection.to_person_id)
-    new_obj = {
-        "first_name" : person.first_name,
-        "last_name" : person.last_name,
-        "id": person.id,
-        "email": person.email,
-        "connection_type": connection.connection_type.value,
-        "connection_id": connection.id,
-        "from_person_id": connection.from_person_id
-    }
-    return jsonify(new_obj), HTTPStatus.CREATED
+    isValid = checkConnectionValidity(connection)
+    if(isValid['passed']):
+        connection.save()
+        person = Person.query.get(connection.to_person_id)
+        new_obj = {
+            "first_name" : person.first_name,
+            "last_name" : person.last_name,
+            "id": person.id,
+            "email": person.email,
+            "connection_type": connection.connection_type.value,
+            "connection_id": connection.id,
+            "from_person_id": connection.from_person_id
+        }
+        return jsonify(new_obj), HTTPStatus.CREATED
+    else:
+       return jsonify({'error': "Invalid Input"}), HTTPStatus.BAD_REQUEST 
+
+
+def checkConnectionValidity(connection):
+    if(isinstance(connection.from_person_id, int) and isinstance(connection.to_person_id, int)):
+        #both id's are integers
+        if(hasattr(ConnectionType, connection.connection_type.value)):
+            #has a proper connection type
+            return {'passed': True}
+        else:
+            return {'passed': False, 'error': "Invalid connection type"}
+    else:
+        return {'passed': False, 'error': "Invalid id format. Must be of type Int"}
+    
+    

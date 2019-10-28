@@ -29,13 +29,18 @@ class PersonFactory(BaseFactory):
 
 class ConnectionFactory(BaseFactory):
     """Connection factory."""
-    from_person = SubFactory(PersonFactory)
-    to_person = SubFactory(PersonFactory)
-    BaseFactory.Meta.sqlalchemy_session.commit()
+    
+    #As long as you pass in the right variables from the test function it works
+    #for some reason, and Im probable doing something wrong, it wont let me create new people and use their id's inside here
+    #commented it out so the tests would pass with valid data
+    
+    # from_person = SubFactory(PersonFactory)
+    # to_person = SubFactory(PersonFactory)
+    # BaseFactory.Meta.sqlalchemy_session.commit()
+    # from_person_id = from_person.id
+    # to_person_id = to_person.id
 
     connection_type = 'friend'   
-    from_person_id = from_person.id
-    to_person_id = to_person.id
 
     class Meta:
 
