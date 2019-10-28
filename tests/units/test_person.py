@@ -14,7 +14,6 @@ def test_mutual_friends(db):
     
     #commented out because I couldnt get this to work, see factories for comments
     #the rest of this and the mutual friends check works
-    
     # ConnectionFactory.create_batch(5, to_person_id=instance.id)
     # ConnectionFactory.create_batch(5, to_person_id=target.id)
 

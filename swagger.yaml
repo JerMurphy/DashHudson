@@ -60,19 +60,11 @@ paths:
           description: "Invalid input"
   /connections:
     get:
-      summary: "Get list of connections for a Person Id"
+      summary: "Get list of connections and information about the connected person"
       description: ""
       operationId: "getConnections"
       produces:
       - "application/json"
-      parameters:
-        - in: query
-          name: from_id
-          required: true
-          schema:
-              type: Integer
-              minimum: 1
-          description: The ID of the person you want the connections for
       responses:        
         200:
           description: "successful operation"
