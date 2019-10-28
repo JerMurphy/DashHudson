@@ -47,7 +47,12 @@ docker-compose exec connections flask db upgrade
 docker-compose exec connections pytest
 ```
 
-- Lint code for style violations
+- Running the front end
 ```
-docker-compose exec connections flake8 .
+cd into Client directory
+npm install 
+npm run serve
+
+This will start a local instance of the app running on localhost:8080
+It is integrated with the backend on port 5000. 
 ```
